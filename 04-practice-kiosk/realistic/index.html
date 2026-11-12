@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>MORU COFFEE · 촬영용 모의 키오스크</title>
+  <link rel="stylesheet" href="kiosk.css"><link rel="stylesheet" href="realistic.css">
+</head>
+<body>
+  <div id="frame"><main id="stage" aria-label="모의 키오스크 화면"></main></div>
+
+  <section id="staff" hidden aria-label="직원 메뉴">
+    <h2>촬영용 키오스크 · 직원 메뉴</h2><p><a href="?format=portrait&screen=menu">세로 9:16</a> · <a href="?format=landscape&screen=menu">가로 16:9</a> · <button id="fullscreen">전체 화면</button></p>
+    <p>터치 로그: <span id="staff-count"></span></p>
+    <label>배치 <select id="staff-layout"><option value="A">A (좌측 카테고리)</option><option value="B">B (상단 탭)</option></select></label>
+    <label><input type="checkbox" id="staff-markers"> 모서리 표시</label>
+    <label><input type="checkbox" id="staff-beep"> 터치음</label>
+    <div class="row">
+      <button id="staff-json">로그 JSON</button>
+      <button id="staff-csv">로그 CSV</button>
+      <button id="staff-map">현재 화면 지도</button>
+    </div>
+    <div class="row">
+      <button id="staff-reset">처음 화면으로</button>
+      <button id="staff-clear">로그 지우기</button>
+      <button id="staff-close">닫기</button>
+    </div>
+    <p class="note">모의 화면입니다. 실제 결제 기능이 없습니다. 이 화면의 DOM·로그·지도는 안내 장치 입력으로 쓰지 않습니다.</p>
+  </section>
+
+  <script src="layouts.js"></script>
+  <script src="configure.js"></script><script src="kiosk.js"></script>
+</body>
+</html>

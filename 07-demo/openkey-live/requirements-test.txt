@@ -1,0 +1,6 @@
+# 자동 시험용(시연에는 필요 없음). 브라우저는 설치된 Microsoft Edge를 쓴다(playwright install 불필요).
+# playwright 1.49.1이 쓰는 greenlet은 Python 3.14용 설치 파일이 없어 3.12~3.13에서 쓴다.
+pytest==9.1.1
+playwright==1.49.1
+pillow==12.3.0
+# OCR 비교(tests/ocr-eval, 선택 과제)만 rapidocr·onnxruntime이 더 필요하다. 기본 시험에는 필요 없다.

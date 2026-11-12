@@ -1,0 +1,4 @@
+# OpenKey Live 시연에 필요한 파이썬 패키지(2026-11-12 기준 버전). Python 3.12~3.13 권장.
+# 설치: 루트의 환경-설치.bat
+opencv-python-headless==5.0.0.93
+numpy==2.5.3

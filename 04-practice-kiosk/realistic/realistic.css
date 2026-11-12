@@ -1,0 +1,148 @@
+/* MORU COFFEE — separate photographic camera-test scene. */
+:root {--primary:#722f3e;--primary-off:#c7b9bd;--accent:#c8a46e;--bg:#f5f3ef;--ink:#282422;--sub:#78716b;--line:#e5e0da;--gray:#89817c}
+html,body{background:#151412}
+#stage{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;letter-spacing:-.7px;background:#f7f5f1}
+.btn{border-radius:8px}.logo{color:#272321;font-family:Arial,sans-serif;font-weight:900;letter-spacing:3px}.logo b{font-weight:400;color:#8b6652}
+.hdr-a,.hdr-b{border-bottom:2px solid #e3ded7;background:#fff}
+.hdr-home,.hdr-staff{font-size:28px;border:2px solid #d8d2cb;border-radius:6px;padding:12px 20px}
+.remain{font-size:25px}.remain b,.remain-b b{color:#722f3e;font-variant-numeric:tabular-nums}
+.product-photo{display:block;width:100%;height:100%;background-image:url('assets/cafe-products.png');background-size:400% 400%;background-position:var(--photo-x) var(--photo-y);background-repeat:no-repeat;mix-blend-mode:multiply;flex:none}
+.card{border-radius:8px;background:#fff;border:1px solid #eee9e3;overflow:hidden;padding:10px 6px!important}
+.card .art{width:100%!important;justify-content:center;background:#fff!important;border-radius:0!important}
+.card .product-photo{width:212px;height:212px}
+.card .name{font-size:30px!important;font-weight:600;line-height:1.25;margin-top:6px!important;white-space:normal}
+.card .price{font-size:34px!important;font-weight:800!important;color:#38302b!important;margin-top:8px!important;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.badge{top:10px;left:10px;border-radius:2px;font-size:19px;padding:4px 8px;background:#792e3c;letter-spacing:.4px}.badge.new{background:#637a50}
+.promotion{position:absolute;left:30px;right:30px;top:130px;height:220px;background:#eee5d8;overflow:hidden;padding:30px 40px;display:flex;align-items:center;justify-content:space-between;color:#503f34}
+.promo-tag{font:18px Arial,sans-serif;letter-spacing:3px;color:#8b6e51}.promotion h2{font-size:39px;line-height:1.25;margin:16px 0 10px;letter-spacing:-2px}.promotion p{font-size:25px;margin:0;color:#806a57}
+.promo-products{display:flex;height:200px;width:350px;align-items:center}.promo-products .product-photo{width:200px;height:200px;transform:rotate(-7deg)}.promo-products .product-photo+*{margin-left:-45px;transform:rotate(8deg)}
+.cats-a{top:385px;width:195px;left:25px;gap:8px}.cat-a{font-size:31px;height:110px;border-radius:8px;padding-left:20px}.cat-a.on{background:#722f3e;color:#fff}
+.panel-a{left:235px;top:385px;width:820px;height:1030px;border-radius:0;background:transparent;padding:0}
+.panel-a .grid{grid-auto-rows:300px;gap:14px}.panel-a .card .art{height:204px}.panel-a .card .product-photo{width:198px;height:198px}
+.panel-a .card .name{font-size:27px!important}.panel-a .card .price{font-size:32px!important;margin-top:5px!important}
+.panel-a .pager{bottom:0}.btn.pg{border-radius:4px;background:#eee9e3;width:90px;height:64px;font-size:28px}.pg-num{font-size:26px;color:#64584e}
+.bottom-a{top:1445px}.sum-a{height:130px;padding:0 25px;gap:14px}.sum-a .lbl{font-size:28px}.sum-a .val{font-size:44px;margin-right:8px}.clear-a{font-size:26px;width:140px;height:95px}.pay-a{width:250px;height:95px;font-size:36px}
+.cart-empty{font-size:34px;color:#a29890;height:230px}.cube{background:linear-gradient(135deg,#9d7d66 50%,#715a49 50%);width:36px;height:36px}
+.cart-row{height:86px;gap:12px}.cr-name{font-size:29px}.cr-name small{font-size:22px}.cr-price{font-size:30px}.btn.step{width:60px;height:60px;border-radius:4px;font-size:32px}.stepper .qty{font-size:30px;width:38px}.btn.del{width:48px;height:48px;font-size:24px;border-radius:3px}
+#stage[data-layout='B']{background:#faf8f5}.cats-b{top:380px;height:82px;gap:0;border-bottom:3px solid #722f3e}.cat-b{font-size:32px;border-radius:0}.cat-b.on{background:#722f3e;color:white}
+.panel-b{top:490px;height:950px}.panel-b .grid{grid-auto-rows:278px;gap:16px 18px}.panel-b .card{align-items:center}.panel-b .card .art{height:175px}.panel-b .card .product-photo{width:175px;height:175px}.panel-b .card .name,.panel-b .card .price{text-align:center;padding-left:0;font-size:29px!important}.panel-b .card .price{font-size:32px!important;margin-top:5px!important}
+.bottom-b{top:1445px;background:#fff;border-top:3px solid #722f3e;border-radius:0;box-shadow:none}.cart-head{font-size:29px;top:25px}.clear-b{font-size:24px}.remain-b{font-size:22px}.cart-b{top:100px}.cart-b .cr-name{font-size:27px}.cart-b .cr-name small{font-size:20px}.cart-b .cr-price{font-size:27px;width:130px}.pay-b{top:25px;width:290px;height:415px;border-radius:7px;gap:14px}.pay-count{font-size:28px}.pay-total{font-size:43px}.pay-label{font-size:45px}.cart-b .cart-empty{font-size:32px}
+.modal{border-radius:12px;box-shadow:0 14px 65px #0003}.dim{background:#18130f99}.opt-modal{top:240px;height:1420px}.om-left .art{width:400px;height:400px}.om-left .product-photo{width:400px;height:400px}.om-left{padding-top:55px;height:1140px}.om-name{font-size:44px;margin-top:25px}.om-desc{font-size:27px}.om-price{font-size:46px;color:#433b35}.om-right{height:1110px}.og-h{font-size:35px}.req{font-size:28px}.max{font-size:26px}.opt{font-size:32px;min-height:100px;border-radius:5px}.opt .dot{width:32px;height:32px;margin-right:18px;border-width:3px}.opt.on .dot{border-width:10px}.stepper-opt .stepper{margin-top:10px}.om-foot{height:280px}.om-total{font-size:55px}.om-cancel,.om-add{font-size:44px}
+.cf-modal{border-top:10px solid #722f3e}.cf-modal h2{font-size:47px}.cf-total{border-top:2px solid #eee5de;padding-top:25px}.to-modal{border-top:10px solid #722f3e}
+.start{background:linear-gradient(145deg,#f8f4ed 0%,#f8f4ed 68%,#e9ddcd 68%)}.start .logo.big{margin-top:330px;font-size:76px}.start h1{font-size:63px;margin-top:70px}.start .sub{margin-top:75px;font-size:36px;color:#8b7566;letter-spacing:3px}.dine-card{border:1px solid #d8cbbf;background:#fffdf9;border-radius:10px;box-shadow:none;font-size:50px}.dine-card svg{filter:grayscale(1);opacity:.65}.dine{gap:45px;margin-top:55px}.lang-btn{border-radius:4px;font-size:28px;background:#fff8;border-color:#e0d8cf}.lang{bottom:200px}.practice-btn{font-size:25px;bottom:95px}
+.pay-card{border-radius:8px;border:2px solid #dfd6ca;box-shadow:none;background:#fffdf9}.pay-card svg,.insert svg,.chk svg{filter:grayscale(.8)}.pay h1,.cardpay h1{font-size:58px}.mock-note{font-size:27px;color:#95877c}.pay-amt b,.ono{color:#722f3e}.done{background:#faf7f2}.done h1{font-size:60px}.back-note{font-size:26px}
+.corner{border-color:#222}.flash{font-size:34px;border-radius:7px;padding:28px 40px}
+/* Widescreen monitor / horizontal kiosk, logical 1920x1080. */
+html[data-format='landscape'] #stage{width:1920px;height:1080px}
+html[data-format='landscape'] .hdr-a,html[data-format='landscape'] .hdr-b{height:100px;padding:0 32px}
+html[data-format='landscape'] .logo{font-size:34px}
+html[data-format='landscape'] .promotion{left:240px;right:430px;top:125px;height:150px;padding:22px 35px}
+html[data-format='landscape'] .promotion h2{font-size:34px;margin:10px 0 6px}
+html[data-format='landscape'] .promotion p{font-size:23px}
+html[data-format='landscape'] .promo-tag{font-size:14px}
+html[data-format='landscape'] .promo-products{height:150px;width:320px}
+html[data-format='landscape'] .promo-products .product-photo{width:165px;height:165px}
+html[data-format='landscape'] .cats-a,html[data-format='landscape'] .cats-b{left:26px;top:125px;width:190px;height:auto;right:auto;display:flex;flex-direction:column;gap:10px;border:0}
+html[data-format='landscape'] .cat-a,html[data-format='landscape'] .cat-b{height:94px;flex:none;font-size:28px;text-align:left;padding-left:22px;border-radius:6px}
+html[data-format='landscape'] .panel-a,html[data-format='landscape'] .panel-b{left:240px;right:auto;top:295px;width:1250px;height:750px;padding:0;background:transparent}
+html[data-format='landscape'] .panel-a .grid,html[data-format='landscape'] .panel-b .grid{grid-template-columns:repeat(4,1fr);grid-auto-rows:326px;gap:20px 16px}
+html[data-format='landscape'] .card .art{height:223px}
+html[data-format='landscape'] .card .product-photo{width:220px;height:220px}
+html[data-format='landscape'] .card .name{font-size:27px!important}
+html[data-format='landscape'] .card .price{font-size:30px!important;margin-top:5px!important}
+html[data-format='landscape'] .pager{bottom:0;height:54px;gap:25px}
+html[data-format='landscape'] .btn.pg{height:50px;width:80px;font-size:23px}
+html[data-format='landscape'] .pg-num{font-size:23px}
+html[data-format='landscape'] .bottom-a,html[data-format='landscape'] .bottom-b{left:1520px;right:24px;top:125px;bottom:24px;border:1px solid #ded5cb;background:#fff;border-radius:6px}
+html[data-format='landscape'] .cart-head{left:20px;top:20px;width:332px;display:flex;flex-wrap:wrap;font-size:28px;gap:5px}
+html[data-format='landscape'] .clear-b{padding:8px;font-size:19px;margin-left:auto}
+html[data-format='landscape'] .remain-b{width:100%;margin-top:10px;font-size:20px}
+html[data-format='landscape'] .cart-b{left:18px;top:150px;width:336px}
+html[data-format='landscape'] .cart-row{height:160px;position:relative;display:block;padding-top:12px}
+html[data-format='landscape'] .cart-b .cr-name,html[data-format='landscape'] .cr-name{font-size:25px;white-space:normal;padding-right:30px}
+html[data-format='landscape'] .cr-name small{font-size:17px}
+html[data-format='landscape'] .cart-row .stepper{position:absolute;left:0;bottom:15px;gap:5px}
+html[data-format='landscape'] .cart-row .btn.step{width:39px;height:39px;font-size:25px}
+html[data-format='landscape'] .cart-row .qty{width:30px;font-size:23px}
+html[data-format='landscape'] .cart-row .cr-price{position:absolute;right:0;bottom:18px;width:auto;font-size:24px}
+html[data-format='landscape'] .cart-row .btn.del{position:absolute;right:0;top:15px;width:28px;height:28px;font-size:16px}
+html[data-format='landscape'] .cart-empty{height:360px;font-size:26px!important;flex-direction:column;gap:25px;justify-content:center!important}
+html[data-format='landscape'] .pay-b{right:18px;left:18px;top:auto;bottom:18px;width:auto;height:215px;gap:8px}
+html[data-format='landscape'] .pay-count{font-size:24px}
+html[data-format='landscape'] .pay-total{font-size:44px}
+html[data-format='landscape'] .pay-label{font-size:36px}
+html[data-format='landscape'] .sum-a{height:190px;flex-wrap:wrap;padding:20px;gap:8px}
+html[data-format='landscape'] .sum-a .lbl{font-size:23px}
+html[data-format='landscape'] .sum-a .val{font-size:29px;margin:0}
+html[data-format='landscape'] .clear-a{width:310px;height:50px;font-size:24px;margin:0}
+html[data-format='landscape'] .pay-a{position:absolute;bottom:18px;left:18px;width:calc(100% - 36px);height:160px;font-size:42px}
+html[data-format='landscape'] .cart-a{padding:0 18px}
+html[data-format='landscape'] .opt-modal{left:420px;right:420px;top:65px;height:950px}
+html[data-format='landscape'] .om-left{width:470px;height:760px;padding-top:40px}
+html[data-format='landscape'] .om-left .art,html[data-format='landscape'] .om-left .product-photo{width:330px;height:330px}
+html[data-format='landscape'] .om-name{font-size:38px}
+html[data-format='landscape'] .om-desc{font-size:23px}
+html[data-format='landscape'] .om-price{font-size:40px}
+html[data-format='landscape'] .om-right{left:500px;top:20px;right:35px;height:710px}
+html[data-format='landscape'] .og{margin-bottom:16px}
+html[data-format='landscape'] .og-h{font-size:28px;margin:10px 0 12px}
+html[data-format='landscape'] .req,html[data-format='landscape'] .max{font-size:22px}
+html[data-format='landscape'] .opt{font-size:27px;min-height:70px;margin-bottom:10px;padding:0 18px}
+html[data-format='landscape'] .stepper-opt{padding:10px 18px}
+html[data-format='landscape'] .stepper-opt .stepper{width:auto;margin-left:auto;margin-top:0}
+html[data-format='landscape'] .stepper-opt .opt-price{margin-right:10px}
+html[data-format='landscape'] .stepper-opt .btn.step{width:42px;height:42px;font-size:27px}
+html[data-format='landscape'] .stepper-opt .qty{font-size:25px;width:25px}
+html[data-format='landscape'] .om-foot{height:190px}
+html[data-format='landscape'] .om-total{left:30px;top:20px;font-size:42px}
+html[data-format='landscape'] .stepper.big{right:30px;top:12px}
+html[data-format='landscape'] .om-cancel,html[data-format='landscape'] .om-add{bottom:20px;height:90px;width:470px;font-size:35px}
+html[data-format='landscape'] .om-cancel{left:30px}
+html[data-format='landscape'] .om-add{right:30px}
+html[data-format='landscape'] .cf-modal{left:500px;right:500px;top:80px;height:920px;padding:40px 45px 0}
+html[data-format='landscape'] .cf-modal h2{font-size:38px}
+html[data-format='landscape'] .cf-dine{font-size:24px;margin-top:15px}
+html[data-format='landscape'] .cf-list{height:440px;margin-top:20px}
+html[data-format='landscape'] .cf-row{height:80px;font-size:28px}
+html[data-format='landscape'] .cf-name small{font-size:19px}
+html[data-format='landscape'] .cf-qty{width:80px}
+html[data-format='landscape'] .cf-price{width:160px}
+html[data-format='landscape'] .cf-total{margin-top:15px;font-size:32px}
+html[data-format='landscape'] .cf-total b{font-size:42px}
+html[data-format='landscape'] .cf-btns{left:45px;right:45px;bottom:35px}
+html[data-format='landscape'] .cf-btns .btn{height:100px;font-size:35px}
+html[data-format='landscape'] .to-modal{left:500px;right:500px;top:290px;height:500px}
+html[data-format='landscape'] .to-modal h2{font-size:43px}
+html[data-format='landscape'] .to-modal p{font-size:28px}
+html[data-format='landscape'] .to-btns .btn{font-size:36px;height:110px}
+html[data-format='landscape'] .start .logo.big{margin-top:150px;font-size:75px}
+html[data-format='landscape'] .start h1{font-size:57px;margin-top:35px}
+html[data-format='landscape'] .start .sub{font-size:29px;margin-top:25px}
+html[data-format='landscape'] .dine{margin-top:35px}
+html[data-format='landscape'] .dine-card{width:370px;height:330px;gap:15px;font-size:38px}
+html[data-format='landscape'] .dine-card svg{width:145px;height:145px}
+html[data-format='landscape'] .lang{bottom:90px;gap:15px}
+html[data-format='landscape'] .lang-btn{height:65px;width:170px;font-size:23px}
+html[data-format='landscape'] .practice-btn{bottom:15px;font-size:20px}
+html[data-format='landscape'] .pay h1,html[data-format='landscape'] .cardpay h1{margin-top:160px;font-size:48px}
+html[data-format='landscape'] .pay-amt{margin-top:25px;font-size:32px}
+html[data-format='landscape'] .pay-amt b{font-size:47px}
+html[data-format='landscape'] .pay-cards{margin-top:55px;gap:40px}
+html[data-format='landscape'] .pay-card{width:340px;height:330px;font-size:36px;gap:20px}
+html[data-format='landscape'] .mock-note{margin-top:35px;font-size:23px}
+html[data-format='landscape'] .pay-back{bottom:65px;width:400px;height:100px;font-size:34px}
+html[data-format='landscape'] .insert{margin-top:20px}
+html[data-format='landscape'] .insert svg{height:260px;width:300px}
+html[data-format='landscape'] .cardpay .sub{font-size:28px;margin-top:20px}
+html[data-format='landscape'] .done .chk{margin-top:100px}
+html[data-format='landscape'] .done .chk svg{width:100px;height:100px}
+html[data-format='landscape'] .done h1{font-size:46px;margin-top:25px}
+html[data-format='landscape'] .ono-l{font-size:28px;margin-top:30px}
+html[data-format='landscape'] .ono{font-size:135px}
+html[data-format='landscape'] .done .sub{font-size:27px}
+html[data-format='landscape'] .rq{font-size:30px;margin-top:25px}
+html[data-format='landscape'] .rc-btns .btn{width:280px;height:90px;font-size:32px}
+html[data-format='landscape'] .back-note{margin-top:25px;font-size:22px}
+html[data-format='landscape'] .practice h1{font-size:42px;margin-top:140px}
+html[data-format='landscape'] .pr-lr,html[data-format='landscape'] .pr-ud{top:240px;height:550px;left:200px;right:200px}
+html[data-format='landscape'] .pr-next{bottom:80px;height:100px;font-size:35px}

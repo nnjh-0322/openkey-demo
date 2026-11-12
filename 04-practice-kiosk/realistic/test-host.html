@@ -1,0 +1,12 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MORU · 실시간 촬영 대상</title><style>html,body{margin:0;height:100%;background:#111;overflow:hidden}iframe{border:0;width:100%;height:100%;display:block}#status{position:fixed;bottom:3px;right:6px;color:#777;font:10px sans-serif;pointer-events:none}</style></head><body><iframe id="k" title="촬영 대상 모의 키오스크"></iframe><div id="status">준비 중</div><script>
+// Same-origin ground truth channel for scoring only. No camera/AI inputs read.
+const params=new URLSearchParams(location.search),format=params.get('format')==='landscape'?'landscape':'portrait';
+const f=document.getElementById('k'),tag=document.getElementById('status');
+f.src=`index.html?format=${format}&layout=B&screen=menu&beep=0${params.get('timers')==='1'?'':'&fixed=1'}`;
+let lastVersion=-1,lastSent=0,alive=true;
+window.addEventListener('pagehide',()=>{alive=false;});
+async function tick(){if(!alive)return;try{const K=f.contentWindow.OPENKEY_KIOSK;if(K){const now=Date.now();if(K.state.screenVersion!==lastVersion||now-lastSent>5000){const m=K.currentMap();m.scene='moru-realistic-v1';m.layout='MORU-'+format+'-'+m.layout;
+if(!location.pathname.startsWith('/kiosk/')||location.protocol!=='https:'){tag.textContent='실시간 채점은 기존 HTTPS 서버의 /kiosk/realistic/test-host.html 에서 실행';}
+else{const r=await fetch('/api/kiosk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(m)});if(!r.ok)throw Error('상태 보고 '+r.status);lastVersion=K.state.screenVersion;lastSent=now;tag.textContent='채점 전용: '+m.layout+' / '+m.screen;}}}}catch(e){tag.textContent='보고 실패: '+e.message;}if(alive)setTimeout(tick,300);}
+f.addEventListener('load',tick);
+</script></body></html>

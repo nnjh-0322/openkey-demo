@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenKey 안내 콘솔</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">OpenKey <span>안내 콘솔</span></div>
+  <div class="conn" id="conn" role="status" aria-live="polite"><i></i><span>서버 확인 중</span></div>
+  <div class="source" id="source" hidden></div>
+  <div class="notes">
+    <span id="privacy">영상은 저장하지 않습니다 · 좌표와 시간만 기록</span>
+    <span id="btnSource" hidden>버튼 위치: 시연용 정답 좌표 사용</span>
+  </div>
+</header>
+<p class="offline-banner" id="offlineBanner" role="alert" hidden>서버와 연결이 끊겼습니다. 아래는 마지막으로 받은 상태입니다 — 노트북에서 OpenKey 서버 창이 켜져 있는지 확인해 주세요. 다시 연결되면 저절로 이어집니다.</p>
+
+<main class="grid" id="grid">
+  <section class="panel progress" aria-labelledby="hProgress">
+    <div class="head">
+      <h2 id="hProgress">주문 진행</h2>
+      <span class="goal" id="goalLabel">목표 없음</span>
+      <span class="elapsed num" id="elapsed"></span>
+    </div>
+    <ol class="steps" id="steps" aria-label="주문 단계"></ol>
+    <p class="screen-line" id="screenLine">키오스크 화면 정보를 기다리는 중</p>
+  </section>
+
+  <section class="panel guide" aria-labelledby="hGuide">
+    <div class="head">
+      <h2 id="hGuide">지금 안내</h2>
+      <span class="paused" id="pausedTag" hidden>안내 멈춤 중</span>
+      <span class="paused" id="autoTag" hidden title="시연 보조: 손끝이 목표에 머물면 서버가 대신 누릅니다">자동 누름 켜짐 (시연 보조)</span>
+      <span class="meta num" id="guideMeta"></span>
+    </div>
+    <p class="guide-now" id="guideNow" aria-live="polite">아직 나간 안내가 없습니다</p>
+    <ol class="guide-prev" id="guidePrev" aria-label="이전 안내"></ol>
+    <div class="guide-foot">
+      <span class="safety" id="safety"></span>
+      <div class="btns">
+        <button type="button" id="btnRepeat" title="휴대폰에서 마지막 안내를 다시 읽습니다">다시 듣기 <kbd>R</kbd></button>
+        <button type="button" id="btnPause" title="안내 음성을 잠시 멈추거나 다시 시작합니다">멈춤 <kbd>P</kbd></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel counts" aria-labelledby="hCounts">
+    <div class="head">
+      <h2 id="hCounts">이번 시도 요약</h2>
+      <span class="hint">막힌 곳을 찾기 위한 숫자</span>
+    </div>
+    <dl class="count-list num" id="counts"></dl>
+    <p class="last-press" id="lastPress"></p>
+  </section>
+
+  <section class="panel view" aria-labelledby="hView">
+    <div class="head">
+      <h2 id="hView">손끝과 목표 버튼</h2>
+      <div class="seg" role="group" aria-label="보기 방식" id="viewSeg">
+        <button type="button" data-mode="auto" aria-pressed="true">자동</button>
+        <button type="button" data-mode="kiosk" aria-pressed="false">키오스크</button>
+        <button type="button" data-mode="full" aria-pressed="false">전체 영상</button>
+        <button type="button" data-mode="schematic" aria-pressed="false">도식</button>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="cv" aria-label="키오스크 화면과 손끝 위치"></canvas>
+      <p class="stage-note" id="stageNote"></p>
+    </div>
+    <div class="legend"><span class="lg-target"></span>목표 버튼 <span class="lg-finger"></span>손끝 <span class="lg-arrow"></span>안내 방향</div>
+  </section>
+
+  <section class="panel status" aria-labelledby="hStatus">
+    <div class="head">
+      <h2 id="hStatus">인식 상태</h2>
+    </div>
+    <p class="status-todo" id="statusTodo" role="status">상태를 기다리는 중</p>
+    <dl class="status-list num" id="statusList"></dl>
+  </section>
+
+  <section class="panel run" aria-labelledby="hRun">
+    <div class="head">
+      <h2 id="hRun">시험 운영</h2>
+      <span class="meta num" id="runMeta"></span>
+    </div>
+
+    <form id="startForm" autocomplete="off">
+      <div class="fields">
+        <label class="f"><span>기록 구분</span>
+          <select id="fSource" name="data_source">
+            <option value="rehearsal">연습 기록 (팀원)</option>
+            <option value="field">실제 사용자 기록</option>
+            <option value="synthetic">예시 데이터 (합성 시험)</option>
+          </select>
+        </label>
+        <label class="f"><span>주문 목표</span>
+          <select id="fGoal" name="goal_id"><option value="">목표를 불러오는 중</option></select>
+        </label>
+        <fieldset class="f radios"><legend>키오스크 배치</legend>
+          <label><input type="radio" name="layout" value="A" checked> A</label>
+          <label><input type="radio" name="layout" value="B"> B</label>
+        </fieldset>
+        <fieldset class="f radios"><legend>음성 안내</legend>
+          <label><input type="radio" name="guidance" value="on" checked> 있음</label>
+          <label><input type="radio" name="guidance" value="off"> 없음</label>
+        </fieldset>
+        <fieldset class="f radios"><legend>안대</legend>
+          <label><input type="radio" name="blindfold" value="yes"> 예</label>
+          <label><input type="radio" name="blindfold" value="no"> 아니오</label>
+          <label><input type="radio" name="blindfold" value="unknown" checked> 모름</label>
+        </fieldset>
+        <label class="f"><span>참가자 코드</span>
+          <input id="fCode" name="participant_code" placeholder="P01" maxlength="12" aria-describedby="codeHint">
+          <small id="codeHint">이름 대신 P01 같은 코드만 적습니다</small>
+        </label>
+        <label class="f"><span>조명 메모</span>
+          <input id="fLight" name="lighting_note" placeholder="예: 창가, 오후" maxlength="60">
+        </label>
+        <label class="f wide"><span>운영 메모</span>
+          <input id="fNote" name="operator_note" placeholder="예: 두 번째 연습" maxlength="120">
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary" id="btnStart">시도 시작</button>
+        <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+      </div>
+    </form>
+
+    <div class="running" id="running" hidden>
+      <p class="run-cond" id="runCond"></p>
+      <label class="f inline"><span>주문 목표 변경</span>
+        <select id="fGoalLive"></select>
+      </label>
+      <div class="actions" id="endActions">
+        <button type="button" class="primary" id="btnEnd">시도 종료</button>
+        <span class="end-note" id="endNote"></span>
+      </div>
+      <div class="confirm" id="endConfirm" hidden role="alertdialog" aria-labelledby="endConfirmText">
+        <p id="endConfirmText">아직 주문 번호 전입니다. 중단으로 기록하고 끝낼까요?</p>
+        <div class="actions">
+          <button type="button" class="primary" id="btnEndAbort">중단으로 종료</button>
+          <button type="button" id="btnEndCancel">계속 진행 <kbd>Esc</kbd></button>
+        </div>
+      </div>
+    </div>
+    <p class="msg" id="runMsg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel past" aria-labelledby="hPast">
+    <div class="head">
+      <h2 id="hPast">지난 시도</h2>
+      <button type="button" class="link" id="btnReload">새로 고침</button>
+    </div>
+    <div class="past-wrap">
+      <table class="past-table num" id="pastTable">
+        <thead><tr><th scope="col">시도</th><th scope="col">결과</th><th scope="col">기록 내려받기</th></tr></thead>
+        <tbody id="pastBody"><tr><td colspan="3" class="empty">불러오는 중</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<title>OpenKey 안내</title>
+<style>
+  :root { --bg: #0b1220; --ink: #f8fafc; --muted: #a5b4c8; --start: #0f766e; --again: #1d4ed8; --stop: #b42318; --line: #233047; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif; overflow: hidden; }
+  body { display: flex; flex-direction: column; height: 100dvh; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  /* 배치(11/12 수정): 카메라 영상을 크게 보이고, 큰 버튼 3개는 아래 한 줄(가로 화면이면 오른쪽 세로 줄). */
+  #top { flex: 0 0 auto; display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  #status { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  #now { font-size: clamp(18px, 5.4vw, 28px); font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+  #sub { font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.35; }
+  #tools { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+  .tool { font: inherit; font-size: 13px; color: var(--ink); background: #172238; border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; min-width: 92px; min-height: 40px; }
+  #view { flex: 1 1 auto; min-height: 0; position: relative; margin: 8px 8px 0; border-radius: 14px; overflow: hidden; background: #000; border: 1px solid var(--line); }
+  video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+  #viewNote { position: absolute; left: 8px; bottom: 8px; font-size: 12px; color: #cbd5e1; background: #0b1220c0; padding: 2px 8px; border-radius: 6px; pointer-events: none; }
+  main { flex: 0 0 auto; height: clamp(124px, 24dvh, 210px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 8px; }
+  main button { font: inherit; font-size: clamp(20px, 6.2vw, 38px); font-weight: 800; color: #fff; border: 0; border-radius: 18px; width: 100%; height: 100%; letter-spacing: 0; padding: 4px; word-break: keep-all; line-height: 1.15; overflow: hidden; }
+  #bStart { background: var(--start); } #bAgain { background: var(--again); } #bStop { background: var(--stop); }
+  main button:active { filter: brightness(1.25); transform: scale(0.99); }
+  main button small { display: block; font-size: clamp(11px, 3.2vw, 16px); font-weight: 400; letter-spacing: 0; margin-top: 4px; opacity: 0.9; }
+  /* 가로 화면(거치대에 가로로 둘 때): 왼쪽 영상, 오른쪽 상태+버튼 */
+  @media (orientation: landscape) {
+    body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(200px, 32vw, 340px); grid-template-rows: auto minmax(0, 1fr); }
+    #view { grid-column: 1; grid-row: 1 / span 2; margin: 8px 0 8px 8px; }
+    #top { grid-column: 2; grid-row: 1; border-bottom: 0; flex-direction: column; align-items: stretch; }
+    #tools { flex-direction: row; }
+    .tool { flex: 1; min-width: 0; }
+    main { grid-column: 2; grid-row: 2; height: auto; min-height: 0; grid-template-columns: 1fr; grid-template-rows: repeat(3, minmax(0, 1fr)); }
+    main button { font-size: clamp(20px, 5.2vh, 36px); }
+    main button small { display: none; }
+    #now { font-size: clamp(16px, 4.6vh, 24px); }
+  }
+  #gate { position: fixed; inset: 0; z-index: 10; background: #0b1220f2; color: var(--ink); border: 0; font: inherit; font-size: clamp(26px, 8vw, 44px); font-weight: 800; line-height: 1.4; padding: 24px; }
+  #gate small { display: block; font-size: clamp(15px, 4.4vw, 20px); font-weight: 400; color: var(--muted); margin-top: 16px; line-height: 1.6; }
+  #gate[hidden] { display: none; }
+  .off { opacity: 0.55; }
+</style>
+</head>
+<body>
+<button id="gate" type="button" aria-label="화면 아무 곳이나 한 번 누르세요. 소리와 카메라를 켭니다.">
+  화면을 한 번<br>눌러 주세요
+  <small>소리와 카메라를 켭니다.<br>휴대폰은 첫 터치가 있어야 소리가 납니다.<br>카메라 영상은 저장하지 않습니다.</small>
+</button>
+<div id="top">
+  <div id="status" role="status" aria-live="polite"><div id="now">준비 중</div><div id="sub">서버에 연결하는 중</div></div>
+  <div id="tools">
+    <button class="tool" id="bMic" type="button" aria-label="말로 명령하기. 시작, 다시, 멈춰, 또는 메뉴 이름을 말하세요.">말로 명령</button>
+    <button class="tool" id="bCam" type="button" aria-label="카메라 켜기 끄기(팀원용)">카메라 끄기</button>
+  </div>
+</div>
+<div id="view" aria-hidden="true"><video id="v" playsinline muted></video><span id="viewNote">카메라 영상 · 저장하지 않음</span></div>
+<main>
+  <button id="bStart" type="button" aria-label="시작. 주문 안내를 시작하거나 다시 이어 갑니다.">시작<small>주문 안내 시작</small></button>
+  <button id="bAgain" type="button" aria-label="다시 듣기. 지금 안내를 다시 들려줍니다.">다시 듣기<small>지금 안내 다시</small></button>
+  <button id="bStop" type="button" aria-label="멈춤. 안내를 잠시 멈춥니다.">멈춤<small>안내 잠시 멈춤</small></button>
+</main>
+<script>
+(() => {
+  // 사용자 기기: 후면 카메라 전송 + 안내 음성 + 진동·효과음 + 큰 버튼 3개 + 짧은 음성 명령.
+  // 음성 인식 문장 원문은 서버에 보내지 않는다(명령 종류만). 카메라 영상은 저장하지 않는다(서버도 최신 1장만 메모리).
+  const $ = (id) => document.getElementById(id);
+  const P = new URLSearchParams(location.search);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let unlocked = false, audio = null, wake = null, stream = null, camOn = false, sayN = null, connected = null, koVoice = null;
+  let speakingPrio = 9, speakingUntil = 0;
+  const RES = +(P.get("res") || 1280);
+  const RATE = Math.min(2, Math.max(0.8, +(P.get("rate") || 1.3)));  // 음성 속도(?rate=1.5 등)
+  const DIRS = /^(LEFT|RIGHT|UP|DOWN)(_SMALL)?$/;
+  const INFORM = /^(SCREEN|PAY_CHECK|DONE|HAND_DOWN|PRESS_OK|PRESS_WRONG|INFO)$/;
+
+  // ---------------------------------------------------------------- 소리·진동
+  function tone(freqs, dur = 0.09, gap = 0.03, vol = 0.18) {
+    if (!audio) return;
+    let t = audio.currentTime + 0.01;
+    for (const fq of freqs) {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = fq; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur + 0.02); t += dur + gap;
+    }
+  }
+  const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+  const CUE = {
+    connected: () => { tone([660]); buzz(40); }, lost: () => { tone([300, 220], 0.15); buzz([300, 120, 300]); },
+    start: () => { tone([520, 780]); buzz(60); }, stop: () => { tone([780, 440]); buzz([120, 60, 120]); },
+    PRESS: () => { tone([1000, 1000], 0.07); buzz([80, 60, 80]); }, PRESS_OK: () => { tone([880, 1320], 0.08); buzz(40); },
+    PRESS_WRONG: () => { tone([260, 200], 0.18); buzz([250, 100, 250]); }, HAND_LOST: () => { tone([330], 0.2); buzz(300); },
+    HAND_DOWN: () => { tone([600, 450], 0.12); buzz([60, 60, 60, 60]); }, DONE: () => { tone([660, 880, 1100], 0.1); buzz([100, 50, 100, 50, 300]); },
+    HOLD: () => { buzz(30); },
+  };
+  function pickVoice() {
+    try { koVoice = (speechSynthesis.getVoices() || []).find((v) => v.lang && v.lang.toLowerCase().startsWith("ko")) || null; } catch (e) {}
+  }
+  if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  let curCode = null;
+  async function speak(text, interrupt, code) {
+    if (!window.speechSynthesis || !text) return;
+    // 방향 안내는 지금 말이 방향일 때만 끊는다(화면·금액 안내는 끝까지 듣게). 서버가 interrupt=true로 보내면 항상 끊는다.
+    const dir = DIRS.test(code || "");
+    // 화면·금액·결과 안내를 읽는 중에는 '손이 보이지 않아요'로 끊지 않고 뒤에 이어 말한다.
+    // (서버의 말 길이 추정은 실제 휴대폰 음성보다 짧을 수 있다)
+    const keep = code === "HAND_LOST" && speechSynthesis.speaking && INFORM.test(curCode || "");
+    const cut = !keep && (interrupt === true || (dir && (!speechSynthesis.speaking || DIRS.test(curCode || ""))));
+    if (cut && speechSynthesis.speaking) { speechSynthesis.cancel(); await sleep(60); } // 일부 안드로이드는 cancel 직후 말이 씹혀 잠깐 쉰다
+    const u = new SpeechSynthesisUtterance(text); u.lang = "ko-KR"; u.rate = RATE; if (koVoice) u.voice = koVoice;
+    u.onstart = () => { curCode = code || null; };
+    u.onend = () => { if (curCode === (code || null)) curCode = null; };
+    speechSynthesis.speak(u);
+  }
+  function show(now, sub) { $("now").textContent = now; if (sub !== undefined) $("sub").textContent = sub; }
+
+  // ---------------------------------------------------------------- 첫 터치: 소리·카메라·화면 꺼짐 방지
+  async function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    $("gate").hidden = true;
+    try { audio = new (window.AudioContext || window.webkitAudioContext)(); await audio.resume(); } catch (e) { audio = null; }
+    speak("오픈키 준비됐어요. 시작 버튼은 화면 위쪽, 다시 듣기는 가운데, 멈춤은 아래쪽입니다.", true);
+    CUE.connected();
+    await keepAwake();
+    await startCam();
+    report();
+  }
+  $("gate").addEventListener("click", unlock);
+  // 첫 터치 전: 화면 안내 + (가능하면) 진동으로 알림. 브라우저는 터치 전 진동·소리를 막을 수 있다.
+  show("화면을 한 번 눌러 주세요", "소리와 카메라가 아직 꺼져 있어요");
+  async function keepAwake() { try { wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; } }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && unlocked && !wake) keepAwake(); });
+  function report() {
+    fetch("/api/phone", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      audio_unlocked: unlocked && !!window.speechSynthesis, speech_supported: !!window.speechSynthesis,
+      recognition_supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition), wake_lock: !!wake,
+      audio_out: P.get("out") || "unknown" }) }).catch(() => {});
+  }
+
+  // ---------------------------------------------------------------- 카메라 전송
+  const v = $("v"), cvs = document.createElement("canvas");
+  let sent = 0, t0 = 0, fps = 0, lastMarkers = null;
+  async function startCam() {
+    try {
+      if (!stream) {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } } });
+        v.srcObject = stream; await v.play();
+      }
+      camOn = true; $("bCam").textContent = "카메라 끄기"; sendLoop();
+    } catch (e) {
+      show("카메라를 켜지 못했어요", "https 주소인지, 카메라 권한을 허용했는지 확인하세요 (" + e.name + ")");
+      speak("카메라를 켜지 못했어요. 팀원에게 알려 주세요.", true); CUE.lost();
+    }
+  }
+  async function sendLoop() {
+    while (camOn) {
+      const started = performance.now();
+      try {
+        if (v.videoWidth) {
+          const sc = Math.min(1, RES / Math.max(v.videoWidth, v.videoHeight));
+          cvs.width = Math.round(v.videoWidth * sc); cvs.height = Math.round(v.videoHeight * sc);
+          cvs.getContext("2d").drawImage(v, 0, 0, cvs.width, cvs.height);
+          const blob = await new Promise((r) => cvs.toBlob(r, "image/jpeg", 0.75));
+          const meta = { fps: +fps.toFixed(1), ua: navigator.userAgent.slice(0, 80), source: "phone" };
+          const r = await fetch("/api/frame", { method: "POST", headers: { "Content-Type": "image/jpeg", "X-Meta": encodeURIComponent(JSON.stringify(meta)) }, body: blob });
+          const j = await r.json(); sent++;
+          const now = performance.now(); if (!t0) t0 = now;
+          if (now - t0 > 1000) { fps = sent / ((now - t0) / 1000); sent = 0; t0 = now; }
+          lastMarkers = j;
+        }
+      } catch (e) { await sleep(800); }
+      const wait = 66 - (performance.now() - started);
+      if (wait > 0) await sleep(wait);
+    }
+  }
+  $("bCam").onclick = () => {
+    if (camOn) { camOn = false; $("bCam").textContent = "카메라 켜기"; $("bCam").classList.add("off"); }
+    else { $("bCam").classList.remove("off"); startCam(); }
+  };
+
+  // ---------------------------------------------------------------- 서버 말하기 큐
+  async function listen() {
+    for (;;) {
+      try {
+        const r = await fetch(`/api/say?ch=phone&after=${sayN ?? 0}&wait=1.0`);
+        const j = await r.json();
+        if (connected !== true) { connected = true; if (unlocked) { CUE.connected(); } }
+        if (sayN === null) { sayN = j.n; continue; } // 페이지를 연 시점 이전 말은 건너뜀
+        let items = j.items.filter((it) => it.n > sayN);
+        if (items.length) sayN = items[items.length - 1].n;
+        // 한 번에 여러 개가 오면 낡은 방향 안내는 버리고 마지막 방향만 남긴다
+        const lastDir = [...items].reverse().find((it) => DIRS.test(it.code));
+        items = items.filter((it) => !DIRS.test(it.code) || it === lastDir);
+        for (const it of items) {
+          if (it.code === "CANCEL") {
+            // 손 놓침으로 온 끊기는 방향·누르세요 안내만 끊는다. 화면·금액 안내는 끝까지 읽는다. 멈춤 등 다른 끊기는 항상 끊는다.
+            const informing = window.speechSynthesis && speechSynthesis.speaking && INFORM.test(curCode || "");
+            if (window.speechSynthesis && !(it.reason === "hand_lost" && informing)) speechSynthesis.cancel();
+            continue;
+          }
+          if (it.age_ms > it.ttl_ms) continue;
+          show(it.text);
+          if (!unlocked) continue;
+          (CUE[it.code] || (() => {}))();
+          await speak(it.text, it.interrupt, it.code);
+        }
+        if (j.paused) $("sub").textContent = "안내 멈춤 · 시작을 누르면 이어 갑니다";
+        else if (j.attempt) $("sub").textContent = "안내 중" + (lastMarkers ? ` · 마커 ${lastMarkers.known_markers ?? lastMarkers.markers}/4` : "");
+        else $("sub").textContent = "대기 중 · 시작을 누르세요" + (lastMarkers ? ` · 마커 ${lastMarkers.known_markers ?? lastMarkers.markers}/4` : "");
+      } catch (e) {
+        if (connected !== false) { connected = false; show("서버 연결이 끊겼어요", "같은 와이파이인지 확인하세요"); if (unlocked) { CUE.lost(); speak("서버 연결이 끊겼어요.", true); } }
+        await sleep(1000);
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- 명령(버튼·음성)
+  async function command(cmd, via, goal_id) {
+    try {
+      const r = await fetch("/api/voice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ command: cmd, via, goal_id: goal_id || null }) });
+      if (!r.ok) throw Error(r.status);
+    } catch (e) { if (unlocked) { CUE.lost(); speak("명령을 보내지 못했어요.", true); } }
+  }
+  function onBtn(cmd) {
+    return async (ev) => {
+      ev.preventDefault();
+      if (!unlocked) await unlock();
+      if (cmd === "start") CUE.start(); else if (cmd === "stop") CUE.stop(); else buzz(30);
+      command(cmd, "button");
+    };
+  }
+  $("bStart").addEventListener("click", onBtn("start"));
+  $("bAgain").addEventListener("click", onBtn("repeat"));
+  $("bStop").addEventListener("click", onBtn("stop"));
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const GOALS = [[/라떼|라테/, "hot-latte-1"], [/콜드\s*브루/, "coldbrew-1"], [/아메리카노/, "iced-americano-1"]];
+  function toCommand(text) {
+    // 문장 원문은 여기서만 쓰고 버린다(서버로 보내지 않음).
+    const t = text.replace(/\s+/g, " ");
+    for (const [re, id] of GOALS) if (re.test(t)) return { cmd: "goal", goal_id: id };
+    if (/멈춰|그만|정지|멈춤|스톱/.test(t)) return { cmd: "stop" };
+    if (/다시|뭐라고|한\s*번\s*더|반복/.test(t)) return { cmd: "repeat" };
+    if (/시작|주문|계속|진행/.test(t)) return { cmd: "start" };
+    return null;
+  }
+  if (!SR) { $("bMic").textContent = "음성 명령 없음"; $("bMic").classList.add("off"); $("bMic").setAttribute("aria-label", "이 브라우저는 음성 명령을 지원하지 않습니다. 큰 버튼을 쓰세요."); }
+  $("bMic").onclick = async () => {
+    if (!unlocked) await unlock();
+    if (!SR) { speak("이 휴대폰 브라우저는 음성 명령을 지원하지 않아요. 큰 버튼을 써 주세요.", true); return; }
+    const rec = new SR(); rec.lang = "ko-KR"; rec.interimResults = false; rec.maxAlternatives = 3;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    tone([700]); buzz(30); show("듣는 중…", "시작 · 다시 · 멈춰 · 메뉴 이름");
+    rec.onresult = (ev) => {
+      const alts = [...ev.results[0]].map((a) => a.transcript);
+      const hit = alts.map(toCommand).find(Boolean);
+      if (!hit) { speak("잘 못 알아들었어요. 큰 버튼을 눌러 주세요.", true); return; }
+      if (hit.cmd === "start") CUE.start(); else if (hit.cmd === "stop") CUE.stop();
+      command(hit.cmd, "speech", hit.goal_id);
+    };
+    rec.onerror = (ev) => { speak(ev.error === "not-allowed" ? "마이크 권한이 없어요." : "음성을 듣지 못했어요.", true); };
+    try { rec.start(); } catch (e) { speak("음성 명령을 시작하지 못했어요.", true); }
+  };
+
+  listen();
+})();
+</script>
+</body>
+</html>

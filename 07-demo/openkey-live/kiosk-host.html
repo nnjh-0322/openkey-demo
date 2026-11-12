@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenKey 키오스크</title>
+<style>
+  :root { --ink: #334155; --muted: #64748b; --panel: #f8fafcde; --line: #cbd5e1; --warn: #9a3412; --warn-bg: #fff7ed; }
+  html, body { margin: 0; height: 100%; background: #e2e8f0; overflow: hidden; font: 13px "Malgun Gothic", system-ui, sans-serif; color: var(--ink); }
+  iframe { position: absolute; inset: 0; border: 0; width: 100%; height: 100%; }
+  .mk { position: absolute; image-rendering: pixelated; pointer-events: none; z-index: 5; }
+  #side { position: fixed; z-index: 6; left: 12px; top: 50%; transform: translateY(-50%); width: 230px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+  .pill { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 9px; line-height: 1.45; }
+  .pill b { font-weight: 600; }
+  .pill.warn { background: var(--warn-bg); border-color: #fdba74; color: var(--warn); }
+  .pill small { color: var(--muted); display: block; }
+  #voiceBtn { pointer-events: auto; font: inherit; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 6px 9px; text-align: left; cursor: pointer; color: var(--ink); }
+  #side.narrow { display: none; }
+</style>
+</head>
+<body>
+<iframe id="k" title="모의 키오스크"></iframe>
+<img class="mk" id="m0" alt=""><img class="mk" id="m1" alt=""><img class="mk" id="m2" alt=""><img class="mk" id="m3" alt="">
+<div id="side" aria-live="polite">
+  <div class="pill"><b>OpenKey 안내 장치 시연</b><small>버튼 위치: 시연용 정답 좌표(모의 키오스크가 알려 줌)</small></div>
+  <div class="pill" id="pConn">연결 준비 중</div>
+  <div class="pill" id="pHand">손 인식 준비 중</div>
+  <div class="pill warn" id="pAuto" hidden>자동 누름 켬 — 시연 보조<small>버튼 위에 멈추면 대신 눌러 줍니다. 원래는 사용자가 직접 누릅니다.</small></div>
+  <button id="voiceBtn" type="button">노트북 예비 음성: 꺼짐(누르면 켬)</button>
+  <div class="pill"><small>영상은 저장하지 않습니다. 좌표·시간·화면 상태만 기록합니다.</small></div>
+</div>
+<script>
+(() => {
+  // 역할: (1) 키오스크 + 마커 4개 표시 (2) 키오스크 화면 지도·실제 터치 보고 (3) 손끝 인식(MediaPipe) 결과 보고
+  //       (4) 서버 명령 실행(자동 누름·첫 화면으로) (5) 휴대폰이 없을 때 노트북 예비 음성.
+  // 안내 판단은 서버가 한다. 이 페이지는 카메라 영상을 저장하지 않는다.
+  const P = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  const f = $("k");
+  const layout0 = P.get("layout") || "B";
+  const q = new URLSearchParams({ format: "portrait", layout: layout0, beep: "0" });
+  // fixed=1: 키오스크 타이머 정지(안내 중 '시간 초과' 방지), 주문 번호 27 고정, 카드 화면 자동 승인 없음 → 결제는 간편결제(모의).
+  if (P.get("timers") !== "1") q.set("fixed", "1");
+  if (P.get("screen")) q.set("screen", P.get("screen"));
+  f.src = "/kiosk/realistic/index.html?" + q.toString();
+  const PAD = 40 / 280;  // 흰 여백 비율(서버 /api/marker 와 같아야 함)
+  const marks = [0, 1, 2, 3].map((i) => { const el = $("m" + i); el.src = "/api/marker/" + i + ".png"; return el; });
+  let logInit = null;
+  let lastVersion = -1, lastLayoutSent = 0, logSeen = 0, cmdSeen = 0, geometryKey = "", markers = null;
+  const autoIdx = new Set();
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const K = () => { try { return f.contentWindow.OPENKEY_KIOSK; } catch (e) { return null; } };
+  const stageRect = () => { const s = f.contentDocument && f.contentDocument.getElementById("stage"); return s && s.getBoundingClientRect(); };
+  async function post(path, body) {
+    const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!r.ok) throw Error(path + " " + r.status);
+    return r.json();
+  }
+
+  // ---------------------------------------------------------------- 마커
+  function placeMarkers(r) {
+    const W = innerWidth, Hh = innerHeight;
+    const size = Math.round(Math.max(76, Math.min(150, r.width * 0.2)));
+    const gap = 10, side = r.left >= size + gap && W - r.right >= size + gap;
+    const xs = side ? [r.left - size - gap, r.right + gap] : [r.left + 4, r.right - size - 4];
+    const ys = [Math.max(4, r.top), Math.min(Hh - size - 4, r.bottom - size)];
+    const pos = [[xs[0], ys[0]], [xs[1], ys[0]], [xs[1], ys[1]], [xs[0], ys[1]]];
+    $("side").classList.toggle("narrow", r.left < 250 + size + gap);
+    $("side").style.left = Math.max(8, r.left - size - gap - 240) + "px";
+    return pos.map(([x, y], i) => {
+      const el = marks[i];
+      el.style.left = x + "px"; el.style.top = y + "px"; el.style.width = size + "px"; el.style.height = size + "px";
+      const a = x + size * PAD, b = y + size * PAD, c = x + size * (1 - PAD), d = y + size * (1 - PAD);
+      const n = ([px, py]) => [+((px - r.left) / r.width).toFixed(5), +((py - r.top) / r.height).toFixed(5)];
+      return { id: i, corners: [n([a, b]), n([c, b]), n([c, d]), n([a, d])] };
+    });
+  }
+  function frameLoop() { try { const r = stageRect(); if (r && r.width > 0) markers = placeMarkers(r); } catch (e) {} requestAnimationFrame(frameLoop); }
+  requestAnimationFrame(frameLoop);
+
+  // ---------------------------------------------------------------- 키오스크 보고
+  let tickBusy = false;
+  async function tick() {
+    if (tickBusy) return; tickBusy = true;
+    try {
+      const k = K(), r = stageRect();
+      if (k && r && r.width > 0) {
+        markers = placeMarkers(r);
+        const gk = [r.left, r.top, r.width, r.height, innerWidth, innerHeight].map(Math.round).join(",");
+        const now = Date.now();
+        const body = { touches: [], screen_events: [] };
+        const log = k.getLog();
+        if (logInit !== k) { logInit = k; logSeen = log.length; }  // 이전 세션 터치 기록(localStorage)은 보내지 않는다
+        if (log.length < logSeen) logSeen = 0;
+        for (let i = logSeen; i < log.length; i++) {
+          const e = log[i];
+          if (e.type === "touch") body.touches.push({ x: e.x, y: e.y, id: e.hit, screen: e.screen, screenVersion: e.screenVersion,
+            source: autoIdx.has(i) ? "auto_click" : "direct", pointer: e.pointer, at: e.t || null });
+          if (e.type === "screen") body.screen_events.push({ from: e.from, to: e.to, reason: e.reason, at: e.t || null });
+        }
+        logSeen = log.length;
+        if (k.state.screenVersion !== lastVersion || gk !== geometryKey || now - lastLayoutSent > 1000 || body.touches.length) {
+          const m = k.currentMap();
+          delete m.texts;  // 글자 단위 측정은 안내에 필요 없음(크기만 큼)
+          m.autoDefault = (navigator.maxTouchPoints || 0) === 0;
+          body.state = m; body.markers = markers; body.autoDefault = m.autoDefault;
+          body.stage = { x: r.left, y: r.top, w: r.width, h: r.height, vw: innerWidth, vh: innerHeight };
+          lastVersion = m.screenVersion; geometryKey = gk; lastLayoutSent = now;
+        }
+        if (body.state || body.touches.length || body.screen_events.length) {
+          const j = await post("/api/kiosk", body);
+          $("pConn").innerHTML = `<b>키오스크 연결됨</b> · ${esc(k.state.screen)}${k.state.modal ? "+" + esc(k.state.modal) : ""}<small>${j.attempt ? "시도 " + esc(j.attempt) : "대기 중(휴대폰에서 시작)"}</small>`;
+        }
+      }
+    } catch (e) { $("pConn").textContent = "보고 실패: " + e.message; }
+    tickBusy = false;
+  }
+  setInterval(tick, 120);
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ---------------------------------------------------------------- 서버 명령(자동 누름·첫 화면으로)
+  let handCfg = { zoom: true, det: 0.35, rescan: true, max_side: 0 };
+  if (P.has("zoom")) handCfg.zoom = P.get("zoom") !== "0";
+  if (P.has("det")) handCfg.det = +P.get("det");
+  if (P.has("rescan")) handCfg.rescan = P.get("rescan") !== "0";
+  if (P.has("max_side")) handCfg.max_side = +P.get("max_side");
+  const urlLocked = ["zoom", "det", "rescan", "max_side"].filter((k) => P.has(k));
+  async function cmds() {
+    for (;;) {
+      try {
+        const j = await (await fetch("/api/cmd?after=" + cmdSeen)).json();
+        $("pAuto").hidden = !j.auto_click;
+        laptopMode = j.laptop_voice;
+        const nc = Object.assign({}, handCfg);
+        for (const k of Object.keys(j.hand_cfg || {})) if (!urlLocked.includes(k)) nc[k] = j.hand_cfg[k];
+        if (nc.det !== handCfg.det) { handCfg = nc; restartWorker(); } else handCfg = nc;
+        for (const c of j.cmds) {
+          cmdSeen = Math.max(cmdSeen, c.n);
+          const k = K();
+          if (!k) continue;
+          if (c.type === "reset") { k.setState({ layout: c.layout || layout0, screen: c.screen || "start" }); continue; }
+          if (c.type === "click") {
+            if (c.screen_version != null && c.screen_version !== k.state.screenVersion) continue; // 낡은 명령은 버림
+            const doc = f.contentDocument, s = doc.getElementById("stage").getBoundingClientRect();
+            const px = s.left + c.x * s.width, py = s.top + c.y * s.height;
+            const el = doc.elementFromPoint(px, py);
+            const W = f.contentWindow;
+            const before = k.getLog().length;
+            (el || doc.getElementById("stage")).dispatchEvent(new W.PointerEvent("pointerdown", { bubbles: true, cancelable: true, clientX: px, clientY: py, pointerType: "mouse", isPrimary: true }));
+            const after = k.getLog().length;
+            for (let i = before; i < after; i++) autoIdx.add(i);
+            const target = el && el.closest("[data-hit]");
+            if (target) target.click();
+          }
+        }
+      } catch (e) {}
+      await sleep(100);
+    }
+  }
+
+  // ---------------------------------------------------------------- 손끝 인식(MediaPipe, 03-software vendor)
+  const abs = (p) => new URL(p, location.origin).href;
+  let worker = null, modelReady = false, busy = false, lastAt = 0, workerGen = 0, missZoomed = 0, frameN = 0;
+  const rate = [], done = [];
+  function restartWorker() {
+    workerGen++;
+    if (worker) worker.terminate();
+    modelReady = false; busy = false;
+    const gen = workerGen;
+    worker = new Worker("/static/hand-worker.js", { type: "module" });
+    worker.onmessage = (ev) => { if (gen === workerGen) onWorker(ev.data); };
+    worker.onerror = (ev) => { $("pHand").textContent = "손 인식 오류 — 서버를 다시 켜세요"; };
+    worker.postMessage({ type: "init", det: handCfg.det, bundle: abs("/sw/vendor/tasks-vision/vision_bundle.mjs"), wasm: abs("/sw/vendor/tasks-vision/wasm"), model: abs("/sw/vendor/hand_landmarker.task") });
+  }
+  function onWorker(m) {
+    if (m.type === "ready") { modelReady = true; showHand(); return; }
+    if (m.type === "error") { busy = false; $("pHand").textContent = "손 인식 오류: " + m.message; return; }
+    if (m.type !== "result") return;
+    busy = false;
+    const t = m.token, c = t.roi;
+    const hands = (m.landmarks || []).map((lm, i) => {
+      const p = lm[8];
+      const x = c ? c.x + p.x * c.w : p.x * t.w, y = c ? c.y + p.y * c.h : p.y * t.h;
+      const sc = m.handedness && m.handedness[i] && m.handedness[i][0] ? +m.handedness[i][0].score.toFixed(3) : null;
+      return { tip: [+x.toFixed(1), +y.toFixed(1)], score: sc };
+    });
+    rate.push(hands.length ? 1 : 0); if (rate.length > 60) rate.shift();
+    if (c && !t.rescan) missZoomed = hands.length ? 0 : missZoomed + 1;
+    if (hands.length && t.rescan) missZoomed = 0;
+    const now = performance.now(); done.push(now); while (done.length && now - done[0] > 2000) done.shift();
+    const fps = done.length / 2;
+    post("/api/hand", { seq: t.seq, hands, model_ms: +m.modelMs.toFixed(1), input_w: t.iw, input_h: t.ih, zoom: !!c, det_threshold: handCfg.det,
+      fps: +fps.toFixed(1), rescan: !!t.rescan }).catch(() => {});
+    lastResult = { hands: hands.length, ms: m.modelMs, iw: t.iw, ih: t.ih, zoom: !!c, rescan: !!t.rescan };
+  }
+  let lastResult = null;
+  function showHand() {
+    const p = rate.length ? Math.round((100 * rate.reduce((a, b) => a + b, 0)) / rate.length) : null;
+    const lr = lastResult;
+    $("pHand").innerHTML = modelReady
+      ? `<b>손 인식 준비됨</b>${p != null ? ` · 인식률 ${p}%` : ""}<small>${lr ? `입력 ${lr.iw}×${lr.ih}${lr.zoom ? " · 키오스크 주변 확대" : ""}${lr.rescan ? " · 전체 재탐색" : ""} · ${Math.round(lr.ms)}ms` : "카메라 영상을 기다리는 중"} · 기준값 ${handCfg.det}</small>`
+      : "손 인식 준비 중";
+  }
+  setInterval(showHand, 500);
+
+  // 위치 맞춤이 되면 키오스크 + 여유 45%만 잘라 넣는다(작게 찍힌 손을 크게 보기 위함, finger-demo 방식).
+  function apply(H, x, y) { const w = H[2][0] * x + H[2][1] * y + H[2][2]; return [(H[0][0] * x + H[0][1] * y + H[0][2]) / w, (H[1][0] * x + H[1][1] * y + H[1][2]) / w]; }
+  function inv(m) {
+    const [a, b, c] = m[0], [d, e, f2] = m[1], [g, h, i] = m[2];
+    const A = e * i - f2 * h, B = -(d * i - f2 * g), C = d * h - e * g, det = a * A + b * B + c * C;
+    return [[A / det, -(b * i - c * h) / det, (b * f2 - c * e) / det], [B / det, (a * i - c * g) / det, -(a * f2 - c * d) / det], [C / det, -(a * h - b * g) / det, (a * e - b * d) / det]];
+  }
+  let roi = null;
+  function roiFor(info) {
+    if (!handCfg.zoom || !info.H) return null;
+    const q2 = [[0, 0], [1, 0], [1, 1], [0, 1]].map(([x, y]) => apply(inv(info.H), x, y));
+    const xs = q2.map((p) => p[0]), ys = q2.map((p) => p[1]);
+    let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const mg = 0.45 * Math.max(x1 - x0, y1 - y0);
+    x0 = Math.max(0, x0 - mg); y0 = Math.max(0, y0 - mg); x1 = Math.min(info.w, x1 + mg); y1 = Math.min(info.h, y1 + mg);
+    const next = { x: Math.floor(x0), y: Math.floor(y0), w: Math.ceil(x1 - x0), h: Math.ceil(y1 - y0) };
+    if (next.w < 64 || next.h < 64 || next.w * next.h > 0.85 * info.w * info.h) return null;
+    if (!roi || Math.abs(next.x - roi.x) + Math.abs(next.y - roi.y) + Math.abs(next.w - roi.w) + Math.abs(next.h - roi.h) > 0.04 * info.w) roi = next;
+    return roi;
+  }
+  async function pull() {
+    let after = 0;
+    for (;;) {
+      try {
+        const r = await fetch("/api/frame/latest?after=" + after);
+        if (r.status === 204) continue;
+        const info = JSON.parse(decodeURIComponent(r.headers.get("X-Info")));
+        after = info.seq;
+        const blob = await r.blob();
+        if (!modelReady || busy) continue;
+        busy = true;
+        frameN++;
+        let c = roiFor(info), rescan = false;
+        // 확대 인식에서 손을 계속 못 찾으면 3장에 1장은 전체 화면에서 다시 찾는다(손이 확대 영역 밖에서 들어올 때 대비)
+        if (c && handCfg.rescan && missZoomed >= 10 && frameN % 3 === 0) { c = null; rescan = true; }
+        const src = c ? await createImageBitmap(blob, c.x, c.y, c.w, c.h) : await createImageBitmap(blob);
+        let bmp = src, iw = src.width, ih = src.height;
+        if (handCfg.max_side > 0 && Math.max(iw, ih) > handCfg.max_side) {
+          const s = handCfg.max_side / Math.max(iw, ih);
+          bmp = await createImageBitmap(src, { resizeWidth: Math.round(iw * s), resizeHeight: Math.round(ih * s) });
+          src.close(); iw = bmp.width; ih = bmp.height;
+        }
+        let at = performance.now(); if (at <= lastAt) at = lastAt + 1; lastAt = at;
+        worker.postMessage({ type: "frame", bitmap: bmp, at, token: { seq: info.seq, w: info.w, h: info.h, roi: c, iw, ih, rescan } }, [bmp]);
+      } catch (e) { busy = false; await sleep(500); }
+    }
+  }
+
+  // ---------------------------------------------------------------- 노트북 예비 음성(휴대폰이 없을 때)
+  let laptopMode = "auto", voiceOn = P.get("voice") === "1", sayN = 0, voiceUnlocked = false;
+  $("voiceBtn").onclick = () => {
+    voiceOn = !voiceOn;
+    if (voiceOn && window.speechSynthesis) { const u = new SpeechSynthesisUtterance("노트북 예비 음성을 켰어요."); u.lang = "ko-KR"; speechSynthesis.speak(u); voiceUnlocked = true; }
+    $("voiceBtn").textContent = "노트북 예비 음성: " + (voiceOn ? "켜짐(휴대폰이 없을 때 말함)" : "꺼짐(누르면 켬)");
+  };
+  async function say() {
+    let lapCode = null;
+    for (;;) {
+      try {
+        const j = await (await fetch(`/api/say?ch=laptop&after=${sayN}&wait=1.0`)).json();
+        if (sayN === 0) { sayN = j.n; continue; } // 페이지를 연 시점 이전 말은 건너뜀
+        for (const it of j.items) {
+          sayN = Math.max(sayN, it.n);
+          if (!voiceOn || !j.speak || !window.speechSynthesis) continue;
+          // 화면·금액 안내를 읽는 중에는 손 놓침 때문에 끊지 않는다(phone.html과 같은 규칙).
+          const informing = speechSynthesis.speaking && /^(SCREEN|PAY_CHECK|DONE|HAND_DOWN|PRESS_OK|PRESS_WRONG|INFO)$/.test(lapCode || "");
+          if (it.code === "CANCEL") { if (!(it.reason === "hand_lost" && informing)) speechSynthesis.cancel(); continue; }
+          if (it.age_ms > it.ttl_ms) continue;
+          if (it.interrupt && !(it.code === "HAND_LOST" && informing)) speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(it.text); u.lang = "ko-KR"; u.rate = 1.3;
+          const code = it.code;
+          u.onstart = () => { lapCode = code; };
+          u.onend = () => { if (lapCode === code) lapCode = null; };
+          speechSynthesis.speak(u);
+        }
+      } catch (e) { await sleep(800); }
+    }
+  }
+
+  f.addEventListener("load", () => { lastVersion = -1; });
+  restartWorker(); pull(); cmds(); say();
+})();
+</script>
+</body>
+</html>

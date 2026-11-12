@@ -1,0 +1,16 @@
+{
+  "type": "ai_generated_product_photo_atlas",
+  "tool": "built-in imagegen",
+  "date": "2026-11-08",
+  "asset": "cafe-products.png",
+  "sha256": "77552f8c9fb47ff15603ad19c53f68328c07ad540dd0dc6d6d17ebc4fa0727db",
+  "layout": "4x4 uniform photo sprite atlas, white background, CSS background-position only",
+  "prompt": "One photorealistic cafe product sprite atlas, exact 4x4 grid, no text/logo/borders; centered studio product shots on white. Row1: iced americano, iced latte, vanilla latte, caramel macchiato. Row2: hot cappuccino, cold brew, chocolate latte, matcha latte. Row3: strawberry milk, yuzu tea, chamomile tea, peach iced tea. Row4: croffle, cheesecake, pink macarons, coffee beans and leaf. Each subject contained in its cell with white margin.",
+  "sourceBaselineSha256": {
+    "index.html": "0f24510838dbac8c343ba54b3e9811737a08ab83006f1a3977f6af1da96f197b",
+    "kiosk.js": "2ef9fa3be60f050b8729a9981cef9213f9154e16d170701c830838d6428501de",
+    "kiosk.css": "114e683bad84fba88ba2e8d9fe83476ef77e866db5a1bc5f127a1e72722f2a2a",
+    "layouts.js": "50242bf1fd14c29641ba9c46167fbecbbfb4c6782a89ed11fa20d28e50863231"
+  },
+  "note": "Synthetic demonstration asset, not an actual store or camera capture."
+}

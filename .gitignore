@@ -1,0 +1,16 @@
+# OpenKey 시연 저장소
+.venv/
+venv/
+work/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.pem
+*.key
+*.crt
+.env
+.env.*
+# 시도 기록은 자동 시험의 합성 예시만 올린다(연습·실제 기록은 각자 PC에만)
+07-demo/openkey-live/runs/*
+!07-demo/openkey-live/runs/examples/
+07-demo/openkey-live/**/tmp/

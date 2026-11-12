@@ -1,0 +1,55 @@
+{
+  "package": "@mediapipe/tasks-vision",
+  "version": "1.2.2",
+  "tarball": "https://registry.npmjs.org/@mediapipe/tasks-vision/-/tasks-vision-1.2.2.tgz",
+  "tarballIntegrity": "sha512-Z7BikxnTvlKgc3d/Nw+LV6B0xyAACxYeAHHUu/xUhm1SV7jlExa9M37beiF/wZFoy0H+cs1PlIT2Z4km02UEHQ==",
+  "modelUrl": "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+  "files": [
+    {
+      "path": "vendor/tasks-vision/wasm/vision_wasm_internal.js",
+      "sha256": "f2b9c17131ea79716ec6bf07b117a087b2749a6f8a1e2f1f2e77a9382092db5b",
+      "bytes": 334128
+    },
+    {
+      "path": "vendor/tasks-vision/wasm/vision_wasm_module_internal.js",
+      "sha256": "72fba0ac8a4034ce9d63f68389df1dead52069409ea621688eedf97f01d4362f",
+      "bytes": 334166
+    },
+    {
+      "path": "vendor/tasks-vision/package.json",
+      "sha256": "8a1a3ac021e8b558a4f204fb69ec4b8a8926ae57e4b9807e2fa9c7545232a232",
+      "bytes": 1026
+    },
+    {
+      "path": "vendor/tasks-vision/README.md",
+      "sha256": "8326ed0beb1983b69cccb190937c2e368388969cb3ade06010fe51e0d5339308",
+      "bytes": 9259
+    },
+    {
+      "path": "vendor/tasks-vision/vision_bundle.mjs",
+      "sha256": "b65acb59b370cd6561afd9d04c29ed7a87e7ed6386922ac1b263af1f1ad06b7d",
+      "bytes": 156062
+    },
+    {
+      "path": "vendor/tasks-vision/wasm/vision_wasm_internal.wasm",
+      "sha256": "f5bd25147ac89d506074293ce2675969b10e827180db95a0d9689c2ed80764ab",
+      "bytes": 14603354
+    },
+    {
+      "path": "vendor/tasks-vision/wasm/vision_wasm_module_internal.wasm",
+      "sha256": "b8927a2eebfe80dd98a426a210a9e820c8215168c06f3bcf5d4d09080f623db5",
+      "bytes": 14603372
+    },
+    {
+      "path": "vendor/hand_landmarker.task",
+      "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+      "bytes": 7819105
+    },
+    {
+      "path": "vendor/APACHE-2.0.txt",
+      "sha256": "8707eef0533987efc5b155d64761eeb6e20793f50b9bd1a68dad1cf4719d0ed8",
+      "bytes": 12331
+    }
+  ],
+  "licenseUrl": "https://raw.githubusercontent.com/google-ai-edge/mediapipe/master/LICENSE"
+}
